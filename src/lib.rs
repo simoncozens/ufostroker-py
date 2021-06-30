@@ -1,4 +1,5 @@
 use glifparser::glif::VWSHandle;
+use glifparser::Handle;
 use glifparser::Outline;
 use glifparser::Point;
 use glifparser::PointData;
@@ -96,10 +97,24 @@ fn py_ufo_glyph_to_outline(glyph: &PyObject) -> Outline<MFEKPointData> {
         let points_o = contour.getattr("points").unwrap();
         let points: &PyList = points_o.downcast::<PyList>().unwrap();
         let mut out_contour = vec![];
-        for point in points.iter() {
+        for i in 0..(points.len() as isize) {
+            let next = (i + 1) % (points.len() as isize);
+            let prev = if i - 1 < 0 {
+                (points.len() as isize) - 1
+            } else {
+                i - 1
+            };
+            let point = points.get_item(i);
+            let typ: PyResult<&str> = point.getattr("type").unwrap().extract();
+            if typ.is_err() {
+                continue;
+            }
+
+            let next_node = points.get_item(next);
+            let prev_node = points.get_item(prev);
+
             let x: f32 = point.getattr("x").unwrap().extract().unwrap();
             let y: f32 = point.getattr("y").unwrap().extract().unwrap();
-            let typ: PyResult<&str> = point.getattr("type").unwrap().extract();
             let ptype = match typ {
                 Ok("move") => PointType::Move,
                 Err(_) => PointType::OffCurve,
@@ -107,7 +122,22 @@ fn py_ufo_glyph_to_outline(glyph: &PyObject) -> Outline<MFEKPointData> {
                 Ok("line") => PointType::Line,
                 _ => PointType::Undefined,
             };
-            out_contour.push(Point::from_x_y_type((x, y), ptype));
+            let mut mfek_point = Point::from_x_y_type((x, y), ptype);
+            let next_typ: PyResult<&str> = next_node.getattr("type").unwrap().extract();
+            if next_typ.is_err() {
+                mfek_point.a = Handle::At(
+                    next_node.getattr("x").unwrap().extract().unwrap(),
+                    next_node.getattr("y").unwrap().extract().unwrap(),
+                )
+            }
+            let prev_typ: PyResult<&str> = prev_node.getattr("type").unwrap().extract();
+            if prev_typ.is_err() {
+                mfek_point.b = Handle::At(
+                    prev_node.getattr("x").unwrap().extract().unwrap(),
+                    prev_node.getattr("y").unwrap().extract().unwrap(),
+                )
+            }
+            out_contour.push(mfek_point);
         }
         out.push(out_contour);
     }
