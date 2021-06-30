@@ -85,15 +85,19 @@ fn constant_width_stroke_internal(
     output_outline
 }
 
-fn py_ufo_glyph_to_outline(glyph: &PyObject) -> Outline<MFEKPointData> {
+fn get_point_type(point: &PyAny) -> PyResult<&str> {
+    point
+        .getattr("type")
+        .unwrap_or_else(|_| point.getattr("segmentType").unwrap())
+        .extract()
+}
+
+fn py_ufo_glyph_to_outline(contours: &PyList) -> Outline<MFEKPointData> {
     let gil = Python::acquire_gil();
     let py = gil.python();
-    let contours_o = glyph.getattr(py, "contours").unwrap();
-    let contours: &PyList = contours_o.as_ref(py).downcast::<PyList>().unwrap();
     let mut out: Outline<MFEKPointData> = vec![];
     for contour in contours.iter() {
-        let points_o = contour.getattr("points").unwrap();
-        let points: &PyList = points_o.downcast::<PyList>().unwrap();
+        let points: &PyList = contour.downcast::<PyList>().unwrap();
         let mut out_contour = vec![];
         for i in 0..(points.len() as isize) {
             let next = (i + 1) % (points.len() as isize);
@@ -103,7 +107,7 @@ fn py_ufo_glyph_to_outline(glyph: &PyObject) -> Outline<MFEKPointData> {
                 i - 1
             };
             let point = points.get_item(i);
-            let typ: PyResult<&str> = point.getattr("type").unwrap().extract();
+            let typ: PyResult<&str> = get_point_type(point);
             if typ.is_err() {
                 continue;
             }
@@ -121,14 +125,14 @@ fn py_ufo_glyph_to_outline(glyph: &PyObject) -> Outline<MFEKPointData> {
                 _ => PointType::Undefined,
             };
             let mut mfek_point = Point::from_x_y_type((x, y), ptype);
-            let next_typ: PyResult<&str> = next_node.getattr("type").unwrap().extract();
+            let next_typ: PyResult<&str> = get_point_type(next_node);
             if next_typ.is_err() {
                 mfek_point.a = Handle::At(
                     next_node.getattr("x").unwrap().extract().unwrap(),
                     next_node.getattr("y").unwrap().extract().unwrap(),
                 )
             }
-            let prev_typ: PyResult<&str> = prev_node.getattr("type").unwrap().extract();
+            let prev_typ: PyResult<&str> = get_point_type(prev_node);
             if prev_typ.is_err() {
                 mfek_point.b = Handle::At(
                     prev_node.getattr("x").unwrap().extract().unwrap(),
@@ -190,7 +194,7 @@ fn str_to_cap(s: &str) -> CapType {
 
 #[pyfunction]
 fn constant_width_stroke(
-    glyph: PyObject,
+    contours: &PyList,
     width: f64,
     startcap: &str,
     endcap: &str,
@@ -212,7 +216,7 @@ fn constant_width_stroke(
         remove_external,
     };
     outline_to_pyish_contours(constant_width_stroke_internal(
-        py_ufo_glyph_to_outline(&glyph),
+        py_ufo_glyph_to_outline(contours),
         &settings,
     ))
 }
