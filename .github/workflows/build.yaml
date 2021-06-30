@@ -27,6 +27,7 @@ jobs:
       - name: Install built wheel - x86_64
         run: |
           pip install ufostroker --no-index --find-links dist --force-reinstall
+          pip install ufoLib2 defcon
           pip install pytest
           cd tests && pytest
       - name: Build wheels - universal2
@@ -68,6 +69,7 @@ jobs:
       - name: Install built wheel
         run: |
           pip install ufostroker --no-index --find-links dist --force-reinstall
+          pip install ufoLib2 defcon
           pip install pytest
           cd tests && pytest
       - name: Upload wheels
@@ -100,6 +102,7 @@ jobs:
       if: matrix.target == 'x86_64'
       run: |
         pip install ufostroker --no-index --find-links dist --force-reinstall
+        pip install ufoLib2 defcon
         pip install pytest
         cd tests && pytest
     - name: Upload wheels
