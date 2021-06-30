@@ -90,8 +90,6 @@ jobs:
       with:
         python-version: 3.9
         architecture: x64
-    - name: Install Linux package dependencies
-      run: sudo apt-get install libfontconfig1 libfreetype6
     - name: Build Wheels
       uses: messense/maturin-action@v1
       with:
@@ -99,6 +97,7 @@ jobs:
         target: ${{ matrix.target }}
         manylinux: auto
         args: --release --out dist --no-sdist
+        container: simoncozens/manylinux_x86_64_ufostroker:latest
     - name: Install built wheel
       if: matrix.target == 'x86_64'
       run: |
