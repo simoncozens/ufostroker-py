@@ -88,7 +88,7 @@ jobs:
         python-version: 3.9
         architecture: x64
     - name: Install Linux package dependencies
-      run: apt-get install libfontconfig1 libfreetype6
+      run: sudo apt-get install libfontconfig1 libfreetype6
     - name: Build Wheels
       uses: messense/maturin-action@v1
       with:
