@@ -208,8 +208,8 @@ fn constant_width_stroke(
         startcap: str_to_cap(startcap),
         endcap: str_to_cap(endcap),
         jointype: str_to_jointype(jointype),
-        remove_internal: false,
-        remove_external: false,
+        remove_internal,
+        remove_external,
     };
     outline_to_pyish_contours(constant_width_stroke_internal(
         py_ufo_glyph_to_outline(&glyph),
