@@ -117,9 +117,12 @@ fn py_ufo_glyph_to_outline(glyph: &PyObject) -> Outline<MFEKPointData> {
 fn outline_to_pyish_contours(outline: Outline<MFEKPointData>) -> Vec<Vec<(f32, f32, String)>> {
     let mut out_contours = vec![];
     for contour in outline.iter() {
-        let mut out_countour = vec![];
+        let mut out_contour = vec![];
         for point in contour.iter() {
-            out_countour.push((
+            if let glifparser::Handle::At(x, y) = point.b {
+                out_contour.push((x, y, "".to_string()));
+            }
+            out_contour.push((
                 point.x,
                 point.y,
                 match point.ptype {
@@ -131,8 +134,11 @@ fn outline_to_pyish_contours(outline: Outline<MFEKPointData>) -> Vec<Vec<(f32, f
                 }
                 .to_string(),
             ));
+            if let glifparser::Handle::At(x, y) = point.a {
+                out_contour.push((x, y, "".to_string()));
+            }
         }
-        out_contours.push(out_countour);
+        out_contours.push(out_contour);
     }
     out_contours
 }
