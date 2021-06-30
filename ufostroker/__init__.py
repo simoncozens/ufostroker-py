@@ -21,7 +21,7 @@ def constant_width_stroke(
         remove_internal: Remove the internal path when stroking closed curves
         remove_external: Remove the external path when stroking closed curves
 
-    Returns nothing, but modifies the glyph
+    Returns nothing, but modifies the glyph.
     """
 
     if not startcap in ["round", "square"]:

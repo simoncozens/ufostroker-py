@@ -93,8 +93,6 @@ fn get_point_type(point: &PyAny) -> PyResult<&str> {
 }
 
 fn py_ufo_glyph_to_outline(contours: &PyList) -> Outline<MFEKPointData> {
-    let gil = Python::acquire_gil();
-    let py = gil.python();
     let mut out: Outline<MFEKPointData> = vec![];
     for contour in contours.iter() {
         let points: &PyList = contour.downcast::<PyList>().unwrap();
