@@ -1,6 +1,6 @@
 [project]
-dependencies = ["ufoLib2~=0.11.0"
+dependencies = ["ufoLib2~=0.11.0"]
 
 [build-system]
 requires = ["maturin>=0.10,<0.11"]
-build-backend = "maturin"]
+build-backend = "maturin"
