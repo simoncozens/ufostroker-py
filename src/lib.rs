@@ -52,7 +52,6 @@ fn constant_width_stroke_internal(
     };
 
     // convert our path and pattern to piecewise collections of beziers
-    println!("Input path: {:?}", path);
     let piece_path = Piecewise::from(&path);
     let mut output_outline = Vec::new();
 
@@ -81,7 +80,6 @@ fn constant_width_stroke_internal(
         let results = variable_width_stroke(&pwpath_contour, &vws_contour, &settings.vws_settings);
         for result_contour in results.segs {
             output_outline.push(result_contour.to_contour());
-            println!("Output segment: {:?}", result_contour.to_contour());
         }
     }
     output_outline
