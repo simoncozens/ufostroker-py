@@ -1,0 +1,184 @@
+use glifparser::glif::VWSHandle;
+use glifparser::Outline;
+use glifparser::Point;
+use glifparser::PointData;
+use glifparser::VWSContour;
+use glifparser::{
+    glif::{InterpolationType, MFEKPointData},
+    CapType, JoinType, PointType,
+};
+use pyo3::prelude::*;
+use pyo3::types::PyList;
+use pyo3::wrap_pyfunction;
+use MFEKmath::variable_width_stroke;
+use MFEKmath::variable_width_stroking::VWSSettings;
+use MFEKmath::Piecewise;
+
+/// Formats the sum of two numbers as string.
+#[pyfunction]
+pub fn sum_as_string(a: usize, b: usize) -> PyResult<String> {
+    Ok((a + b).to_string())
+}
+
+#[pymodule]
+fn ufostroker(_py: Python, m: &PyModule) -> PyResult<()> {
+    m.add_wrapped(wrap_pyfunction!(constant_width_stroke))?;
+    Ok(())
+}
+
+struct CWSSettings {
+    vws_settings: VWSSettings,
+    width: f64,
+    jointype: JoinType,
+    startcap: CapType,
+    endcap: CapType,
+    remove_internal: bool,
+    remove_external: bool,
+}
+
+fn constant_width_stroke_internal(
+    path: Outline<MFEKPointData>,
+    settings: &CWSSettings,
+) -> Outline<MFEKPointData> {
+    let vws_contour = VWSContour {
+        // id: 0,
+        join_type: settings.jointype,
+        cap_start_type: settings.startcap,
+        cap_end_type: settings.endcap,
+        handles: vec![], // to be populated based on number of points
+        remove_internal: settings.remove_internal,
+        remove_external: settings.remove_external,
+    };
+
+    // convert our path and pattern to piecewise collections of beziers
+    println!("Input path: {:?}", path);
+    let piece_path = Piecewise::from(&path);
+    let mut output_outline = Vec::new();
+
+    let mut vws_contours = vec![vws_contour; path.len()];
+
+    let vws_handle = VWSHandle {
+        left_offset: settings.width / 2.0,
+        right_offset: settings.width / 2.0,
+        tangent_offset: 0.0,
+        interpolation: InterpolationType::Linear,
+    };
+
+    for (cidx, contour) in path.iter().enumerate() {
+        let pointiter = contour.iter().enumerate();
+
+        for (_, _) in pointiter {
+            vws_contours[cidx].handles.push(vws_handle);
+        }
+        vws_contours[cidx].handles.push(vws_handle);
+    }
+
+    let iter = piece_path.segs.iter().enumerate();
+    for (i, pwpath_contour) in iter {
+        let vws_contour = &vws_contours[i];
+
+        let results = variable_width_stroke(&pwpath_contour, &vws_contour, &settings.vws_settings);
+        for result_contour in results.segs {
+            output_outline.push(result_contour.to_contour());
+            println!("Output segment: {:?}", result_contour.to_contour());
+        }
+    }
+    output_outline
+}
+
+fn py_ufo_glyph_to_outline(glyph: &PyObject) -> Outline<MFEKPointData> {
+    let gil = Python::acquire_gil();
+    let py = gil.python();
+    let contours_o = glyph.getattr(py, "contours").unwrap();
+    let contours: &PyList = contours_o.as_ref(py).downcast::<PyList>().unwrap();
+    let mut out: Outline<MFEKPointData> = vec![];
+    for contour in contours.iter() {
+        let points_o = contour.getattr("points").unwrap();
+        let points: &PyList = points_o.downcast::<PyList>().unwrap();
+        let mut out_contour = vec![];
+        for point in points.iter() {
+            let x: f32 = point.getattr("x").unwrap().extract().unwrap();
+            let y: f32 = point.getattr("y").unwrap().extract().unwrap();
+            let typ: PyResult<&str> = point.getattr("type").unwrap().extract();
+            let ptype = match typ {
+                Ok("move") => PointType::Move,
+                Err(_) => PointType::OffCurve,
+                Ok("curve") => PointType::Curve,
+                Ok("line") => PointType::Line,
+                _ => PointType::Undefined,
+            };
+            out_contour.push(Point::from_x_y_type((x, y), ptype));
+        }
+        out.push(out_contour);
+    }
+    out
+}
+
+fn outline_to_pyish_contours(outline: Outline<MFEKPointData>) -> Vec<Vec<(f32, f32, String)>> {
+    let mut out_contours = vec![];
+    for contour in outline.iter() {
+        let mut out_countour = vec![];
+        for point in contour.iter() {
+            out_countour.push((
+                point.x,
+                point.y,
+                match point.ptype {
+                    PointType::OffCurve => "",
+                    PointType::Curve => "curve",
+                    PointType::Line => "line",
+                    PointType::Move => "move",
+                    _ => "",
+                }
+                .to_string(),
+            ));
+        }
+        out_contours.push(out_countour);
+    }
+    out_contours
+}
+
+fn str_to_jointype(s: &str) -> JoinType {
+    match s {
+        "bevel" => JoinType::Bevel,
+        "miter" => JoinType::Miter,
+        "round" => JoinType::Round,
+        _ => unimplemented!(),
+    }
+}
+
+fn str_to_cap(s: &str) -> CapType {
+    match s {
+        "round" => CapType::Round,
+        "square" => CapType::Square,
+        _ => CapType::Custom,
+    }
+}
+
+#[pyfunction]
+fn constant_width_stroke(
+    glyph: PyObject,
+    width: f64,
+    startcap: &str,
+    endcap: &str,
+    jointype: &str,
+    remove_internal: bool,
+    remove_external: bool,
+) -> Vec<Vec<(f32, f32, String)>> {
+    let vws_settings = VWSSettings {
+        cap_custom_end: None,
+        cap_custom_start: None,
+    };
+    let settings = CWSSettings {
+        vws_settings,
+        width,
+        startcap: str_to_cap(startcap),
+        endcap: str_to_cap(endcap),
+        jointype: str_to_jointype(jointype),
+        remove_internal: false,
+        remove_external: false,
+    };
+    outline_to_pyish_contours(constant_width_stroke_internal(
+        py_ufo_glyph_to_outline(&glyph),
+        &settings,
+    ))
+}
