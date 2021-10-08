@@ -1,3 +1,4 @@
+[tool.poetry]
 name = "ufostroker"
 version = "0.2.0"
 description = "Path stroking for UFO glyphs"
