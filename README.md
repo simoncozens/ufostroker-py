@@ -14,6 +14,39 @@ constant_width_stroke(f["A"], width=50, startcap="square", endcap="square")
 This modifies the glyph in place. The library works with defcon and ufoLib2
 objects.
 
+This may also be used as a fontmake command line plugin:
+
+```
+fontmake --filter 'pre::ufostroker::StrokeFilter(Width=50)' -u OpenPaths.ufo -o ttf
+```
+
+Or by adding a lib key into the UFO file's `lib.plist` file:
+
+```xml
+    <key>com.github.googlei18n.ufo2ft.filters</key>
+    <array>
+      <dict>
+        <key>name</key>
+        <string>ufostroker.StrokeFilter</string>
+        <key>pre</key>
+        <true/>
+        <key>kwargs</key>
+        <dict>
+            <key>Width</key>
+            <integer>50</integer>
+            <key>StartCap</key>
+            <string>square</string>
+            <key>EndCap</key>
+            <string>square</string>
+            <key>JoinType</key>
+            <string>mitre</string>
+            <key>RemoveExternal</key>
+            <true/>
+        </dict>
+      </dict>
+    </array>
+```
+
 ## Building
 
 Use `maturin` to build `ufostroker`.

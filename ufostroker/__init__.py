@@ -1,5 +1,5 @@
 from .ufostroker import constant_width_stroke as cws_rust
-
+from ufo2ft.filters import BaseFilter
 
 def constant_width_stroke(
     glyph,
@@ -58,3 +58,28 @@ def constant_width_stroke(
             for point in points:
                 contour.appendPoint(point)
         glyph.appendContour(contour)
+
+
+class StrokeFilter(BaseFilter):
+
+    _kwargs = {
+        "Width": 10,
+        "StartCap": "round",
+        "EndCap": "round",
+        "JoinType": "bevel",
+        "RemoveInternal": False,
+        "RemoveExternal": False,
+    }
+
+    def filter(self, glyph):
+        if not len(glyph):
+            return False
+
+        constant_width_stroke(glyph, self.options.Width,
+            startcap= self.options.StartCap,
+            endcap= self.options.StartCap,
+            jointype= self.options.JoinType,
+            remove_external= self.options.RemoveExternal,
+            remove_internal= self.options.RemoveInternal,
+        )
+        return True
