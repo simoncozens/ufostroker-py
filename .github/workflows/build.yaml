@@ -22,6 +22,8 @@ jobs:
       - name: Build wheels - x86_64
         uses: messense/maturin-action@v1
         with:
+          maturin-version: 0.11.3
+          rust-toolchain: nightly
           target: x86_64
           args: --release --out dist
       - name: Install built wheel - x86_64
@@ -66,6 +68,8 @@ jobs:
         uses: messense/maturin-action@v1
         with:
           target: ${{ matrix.target }}
+          maturin-version: 0.11.3
+          rust-toolchain: nightly
           args: --release --out dist --no-sdist
       - name: Install built wheel
         run: |
@@ -95,6 +99,7 @@ jobs:
       with:
         rust-toolchain: nightly
         target: ${{ matrix.target }}
+        maturin-version: 0.11.3
         manylinux: auto
         args: --release --out dist --no-sdist
         container: simoncozens/manylinux_x86_64_ufostroker:latest
