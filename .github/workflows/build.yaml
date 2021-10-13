@@ -26,21 +26,21 @@ jobs:
           rust-toolchain: nightly
           target: x86_64
           args: --release --out dist
-      - name: Install built wheel - x86_64
-        run: |
-          pip install ufo2ft
-          pip install ufostroker --force-reinstall
-          pip install ufoLib2 defcon
-          pip install pytest
-          cd tests && pytest
+      # - name: Install built wheel - x86_64
+      #   run: |
+      #     pip install ufo2ft
+      #     pip install ufostroker --no-index --find-links dist --force-reinstall
+      #     pip install ufoLib2 defcon
+      #     pip install pytest
+      #     cd tests && pytest
       - name: Build wheels - universal2
         uses: messense/maturin-action@v1
         with:
           args: --release --universal2 --out dist --no-sdist
-      - name: Install built wheel - universal2
-        run: |
-          pip install ufostroker --force-reinstall
-          cd tests && pytest
+      # - name: Install built wheel - universal2
+      #   run: |
+      #     pip install ufostroker --no-index --find-links dist --force-reinstall
+      #     cd tests && pytest
       - name: Upload wheels
         uses: actions/upload-artifact@v2
         with:
@@ -72,13 +72,13 @@ jobs:
           maturin-version: 0.11.3
           rust-toolchain: nightly
           args: --release --out dist --no-sdist
-      - name: Install built wheel
-        run: |
-          pip install ufo2ft
-          pip install ufostroker --force-reinstall
-          pip install ufoLib2 defcon
-          pip install pytest
-          cd tests && pytest
+      # - name: Install built wheel
+      #   run: |
+      #     pip install ufo2ft
+      #     pip install ufostroker --no-index --find-links dist --force-reinstall
+      #     pip install ufoLib2 defcon
+      #     pip install pytest
+      #     cd tests && pytest
       - name: Upload wheels
         uses: actions/upload-artifact@v2
         with:
@@ -105,14 +105,14 @@ jobs:
         manylinux: auto
         args: --release --out dist --no-sdist
         container: simoncozens/manylinux_x86_64_ufostroker:latest
-    - name: Install built wheel
-      if: matrix.target == 'x86_64'
-      run: |
-        pip install ufo2ft
-        pip install ufostroker --force-reinstall
-        pip install ufoLib2 defcon
-        pip install pytest
-        cd tests && pytest
+    # - name: Install built wheel
+    #   if: matrix.target == 'x86_64'
+    #   run: |
+    #       pip install ufo2ft
+    #     pip install ufostroker --no-index --find-links dist --force-reinstall
+    #     pip install ufoLib2 defcon
+    #     pip install pytest
+    #     cd tests && pytest
     - name: Upload wheels
       uses: actions/upload-artifact@v2
       with:
