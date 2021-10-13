@@ -1,5 +1,7 @@
 from .ufostroker import constant_width_stroke as cws_rust
 from ufo2ft.filters import BaseFilter
+from fontTools.misc.roundTools import otRound
+
 
 def constant_width_stroke(
     glyph,
@@ -46,9 +48,9 @@ def constant_width_stroke(
                 typ = None
             # Unfortunately defcon and ufoLib2 have different Point constructors...
             try:
-                point = point_class(x,y,typ)
+                point = point_class(x, y, typ)
             except Exception:
-                point = point_class((x,y), typ)
+                point = point_class((x, y), typ)
             points.append(point)
         contour = contour_class()
         # And contour constructors...
