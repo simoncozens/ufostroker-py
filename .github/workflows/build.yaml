@@ -28,6 +28,7 @@ jobs:
           args: --release --out dist
       - name: Install built wheel - x86_64
         run: |
+          pip install ufo2ft
           pip install ufostroker --no-index --find-links dist --force-reinstall
           pip install ufoLib2 defcon
           pip install pytest
@@ -73,6 +74,7 @@ jobs:
           args: --release --out dist --no-sdist
       - name: Install built wheel
         run: |
+          pip install ufo2ft
           pip install ufostroker --no-index --find-links dist --force-reinstall
           pip install ufoLib2 defcon
           pip install pytest
@@ -106,6 +108,7 @@ jobs:
     - name: Install built wheel
       if: matrix.target == 'x86_64'
       run: |
+        pip install ufo2ft
         pip install ufostroker --no-index --find-links dist --force-reinstall
         pip install ufoLib2 defcon
         pip install pytest
