@@ -1,6 +1,8 @@
 from .ufostroker import constant_width_stroke as cws_rust
 from ufo2ft.filters import BaseFilter
 from fontTools.misc.roundTools import otRound
+from beziers.cubicbezier import CubicBezier
+from beziers.point import Point
 
 
 def constant_width_stroke(
@@ -34,7 +36,13 @@ def constant_width_stroke(
         raise ValueError("Unknown join type")
     list_of_list_of_points = [list(c) for c in list(glyph)]
     res = cws_rust(
-        list_of_list_of_points, width, startcap, endcap, jointype, remove_internal, remove_external
+        list_of_list_of_points,
+        width,
+        startcap,
+        endcap,
+        jointype,
+        remove_internal,
+        remove_external,
     )
     contour_class = glyph[0].__class__
     point_class = glyph[0][0].__class__
@@ -43,7 +51,7 @@ def constant_width_stroke(
     for contour in res:
         points = []
         for pt in contour:
-            x,y,typ = pt
+            x, y, typ = pt
             if not typ:
                 typ = None
             # Unfortunately defcon and ufoLib2 have different Point constructors...
@@ -77,11 +85,38 @@ class StrokeFilter(BaseFilter):
         if not len(glyph):
             return False
 
-        constant_width_stroke(glyph, self.options.Width,
-            startcap= self.options.StartCap,
-            endcap= self.options.StartCap,
-            jointype= self.options.JoinType,
-            remove_external= self.options.RemoveExternal,
-            remove_internal= self.options.RemoveInternal,
+        constant_width_stroke(
+            glyph,
+            self.options.Width,
+            startcap=self.options.StartCap,
+            endcap=self.options.StartCap,
+            jointype=self.options.JoinType,
+            remove_external=self.options.RemoveExternal,
+            remove_internal=self.options.RemoveInternal,
         )
+
+        # We have to tunnify it...
+        for contour in glyph:
+            for i in range(0, len(contour)):
+                i1 = (i + 1) % len(contour)
+                i2 = (i + 2) % len(contour)
+                i3 = (i + 3) % len(contour)
+                if (
+                    contour[i].segmentType
+                    and not contour[i1].segmentType
+                    and not contour[i2].segmentType
+                    and contour[i3].segmentType
+                ):
+                    cbez = CubicBezier(
+                        Point(contour[i].x, contour[i].y),
+                        Point(contour[i1].x, contour[i1].y),
+                        Point(contour[i2].x, contour[i2].y),
+                        Point(contour[i3].x, contour[i3].y),
+                    )
+                    cbez.balance()
+                    contour[i1].x = cbez[1].x
+                    contour[i1].y = cbez[1].y
+                    contour[i2].x = cbez[2].x
+                    contour[i2].y = cbez[2].y
+                    pass
         return True

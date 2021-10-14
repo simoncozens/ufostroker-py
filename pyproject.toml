@@ -1,10 +1,10 @@
 name = "ufostroker"
-version = "0.2.1"
+version = "0.2.2"
 description = "Path stroking for UFO glyphs"
 readme = "README.md"
 
 [project]
-dependencies = ["ufo2ft"]
+dependencies = ["ufo2ft", "beziers>=0.4.0"]
 dev-dependencies = ["ufoLib2~=0.11.0", "defcon==0.8.1"]
 name = "ufostroker"
 
