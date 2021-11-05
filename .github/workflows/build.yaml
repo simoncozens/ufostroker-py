@@ -102,9 +102,7 @@ jobs:
         rust-toolchain: nightly
         target: ${{ matrix.target }}
         maturin-version: 0.11.3
-        manylinux: auto
         args: --release --out dist --no-sdist
-        container: simoncozens/manylinux_x86_64_ufostroker:latest
     # - name: Install built wheel
     #   if: matrix.target == 'x86_64'
     #   run: |
