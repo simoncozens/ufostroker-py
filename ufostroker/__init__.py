@@ -1,6 +1,5 @@
 from .ufostroker import constant_width_stroke as cws_rust
 from ufo2ft.filters import BaseFilter
-from fontTools.misc.roundTools import otRound
 from beziers.cubicbezier import CubicBezier
 from beziers.point import Point
 
@@ -13,6 +12,7 @@ def constant_width_stroke(
     jointype="bevel",
     remove_internal=False,
     remove_external=False,
+    segmentwise=False,
 ):
     """Applies a constant-width stroke effect to a glyph, in place.
 
@@ -24,15 +24,16 @@ def constant_width_stroke(
         jointype: Joining type (One of: "round", "bevel", "mitre")
         remove_internal: Remove the internal path when stroking closed curves
         remove_external: Remove the external path when stroking closed curves
+        segmentwise: Whether to apply a noodle to each segment, or to the whole curve
 
     Returns nothing, but modifies the glyph.
     """
 
-    if not startcap in ["round", "square"]:
+    if startcap not in ["round", "square"]:
         raise ValueError("Unknown start cap type")
-    if not endcap in ["round", "square"]:
+    if endcap not in ["round", "square"]:
         raise ValueError("Unknown end cap type")
-    if not jointype in ["round", "bevel", "mitre"]:
+    if jointype not in ["round", "bevel", "mitre"]:
         raise ValueError("Unknown join type")
     list_of_list_of_points = [list(c) for c in list(glyph)]
     res = cws_rust(
@@ -43,6 +44,7 @@ def constant_width_stroke(
         jointype,
         remove_internal,
         remove_external,
+        segmentwise,
     )
     contour_class = glyph[0].__class__
     point_class = glyph[0][0].__class__
@@ -79,6 +81,7 @@ class StrokeFilter(BaseFilter):
         "JoinType": "bevel",
         "RemoveInternal": False,
         "RemoveExternal": False,
+        "Segmentwise": False,
     }
 
     def filter(self, glyph):
@@ -93,6 +96,7 @@ class StrokeFilter(BaseFilter):
             jointype=self.options.JoinType,
             remove_external=self.options.RemoveExternal,
             remove_internal=self.options.RemoveInternal,
+            segmentwise=self.options.Segmentwise,
         )
 
         # We have to tunnify it...

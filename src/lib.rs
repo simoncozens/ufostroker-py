@@ -35,6 +35,7 @@ struct CWSSettings {
     endcap: CapType,
     remove_internal: bool,
     remove_external: bool,
+    segmentwise: bool,
 }
 
 fn constant_width_stroke_internal(
@@ -77,9 +78,30 @@ fn constant_width_stroke_internal(
     for (i, pwpath_contour) in iter {
         let vws_contour = &vws_contours[i];
 
-        let results = variable_width_stroke(&pwpath_contour, &vws_contour, &settings.vws_settings);
-        for result_contour in results.segs {
-            output_outline.push(result_contour.to_contour());
+        let results = if settings.segmentwise {
+            pwpath_contour
+                .segs
+                .iter()
+                .map(|p| {
+                    variable_width_stroke(
+                        &Piecewise::new(vec![p.clone()], None),
+                        &vws_contour,
+                        &settings.vws_settings,
+                    )
+                })
+                .collect()
+        } else {
+            vec![variable_width_stroke(
+                &pwpath_contour,
+                &vws_contour,
+                &settings.vws_settings,
+            )]
+        };
+
+        for result_outline in results {
+            for result_contour in result_outline.segs.iter() {
+                output_outline.push(result_contour.to_contour());
+            }
         }
     }
     output_outline
@@ -199,6 +221,7 @@ fn constant_width_stroke(
     jointype: &str,
     remove_internal: bool,
     remove_external: bool,
+    segmentwise: bool,
 ) -> Vec<Vec<(f32, f32, String)>> {
     let vws_settings = VWSSettings {
         cap_custom_end: None,
@@ -212,6 +235,7 @@ fn constant_width_stroke(
         jointype: str_to_jointype(jointype),
         remove_internal,
         remove_external,
+        segmentwise,
     };
     outline_to_pyish_contours(constant_width_stroke_internal(
         py_ufo_glyph_to_outline(contours),

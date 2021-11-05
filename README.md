@@ -17,7 +17,7 @@ objects.
 This may also be used as a fontmake command line plugin:
 
 ```
-fontmake --filter 'pre::ufostroker::StrokeFilter(Width=50)' -u OpenPaths.ufo -o ttf
+fontmake --filter 'ufostroker::StrokeFilter(pre=True,Width=50)' -u OpenPaths.ufo -o ttf
 ```
 
 Or by adding a lib key into the UFO file's `lib.plist` file:
