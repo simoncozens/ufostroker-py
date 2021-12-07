@@ -5,13 +5,12 @@ authors = ["Simon Cozens <simon@simon-cozens.org>"]
 edition = "2018"
 description = "Python wrapper around the MFEKmath library"
 repository = "https://github.com/simoncozens/ufostroker-py"
+exclude = ["dist/*"]
 
 [dependencies]
 glifparser = { git = "https://github.com/MFEK/glifparser.rlib", branch="master" }
 MFEKmath = { git = "https://github.com/MFEK/math.rlib" }
 
-[package]
-exclude = ["dist/*"]
 
 [lib]
 crate-type = ["cdylib"]
