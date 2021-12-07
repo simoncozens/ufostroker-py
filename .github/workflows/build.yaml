@@ -32,10 +32,14 @@ jobs:
       #     pip install ufoLib2 defcon
       #     pip install pytest
       #     cd tests && pytest
+      - name: Install ARM Rust cross
+        run: rustup target add aarch64-apple-darwin
       - name: Build wheels - universal2
         uses: messense/maturin-action@v1
         with:
           args: --release --universal2 --out dist --no-sdist
+        env:
+          PYO3_CROSS_LIB_DIR: /Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.8/lib
       # - name: Install built wheel - universal2
       #   run: |
       #     pip install ufostroker --no-index --find-links dist --force-reinstall
