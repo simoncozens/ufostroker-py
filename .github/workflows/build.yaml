@@ -6,7 +6,7 @@ on:
 
 jobs:
   macos:
-    runs-on: macos-latest
+    runs-on: macos-11
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
@@ -22,7 +22,6 @@ jobs:
       - name: Build wheels - x86_64
         uses: messense/maturin-action@v1
         with:
-          maturin-version: 0.11.3
           rust-toolchain: nightly
           target: x86_64
           args: --release --out dist
@@ -69,7 +68,6 @@ jobs:
         uses: messense/maturin-action@v1
         with:
           target: ${{ matrix.target }}
-          maturin-version: 0.11.3
           rust-toolchain: nightly
           args: --release --out dist --no-sdist
       # - name: Install built wheel
@@ -103,6 +101,7 @@ jobs:
         target: ${{ matrix.target }}
         manylinux: auto
         args: --release --out dist --no-sdist
+        container: simoncozens/manylinux_x86_64_ufostroker:latest
     # - name: Install built wheel
     #   if: matrix.target == 'x86_64'
     #   run: |
