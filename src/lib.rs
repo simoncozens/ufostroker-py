@@ -200,6 +200,7 @@ fn str_to_jointype(s: &str) -> JoinType {
         "bevel" => JoinType::Bevel,
         "miter" => JoinType::Miter,
         "round" => JoinType::Round,
+        "circle" => JoinType::Circle,
         _ => unimplemented!(),
     }
 }
@@ -207,6 +208,7 @@ fn str_to_jointype(s: &str) -> JoinType {
 fn str_to_cap(s: &str) -> CapType {
     match s {
         "round" => CapType::Round,
+        "circle" => CapType::Circle,
         "square" => CapType::Square,
         _ => CapType::Custom,
     }

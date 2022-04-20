@@ -1,6 +1,6 @@
 [package]
 name = "ufostroker"
-version = "0.2.3"
+version = "0.2.4"
 authors = ["Simon Cozens <simon@simon-cozens.org>"]
 edition = "2018"
 description = "Python wrapper around the MFEKmath library"

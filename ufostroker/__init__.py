@@ -19,9 +19,9 @@ def constant_width_stroke(
     Parameters:
         glyph: A ufoLib2 or defcon glyph object
         width: The stroke width, in points.
-        startcap: Cap to add at the start of the stroke (One of: "round", "square")
-        endcap: Cap to add at the end of the stroke (One of: "round", "square")
-        jointype: Joining type (One of: "round", "bevel", "mitre")
+        startcap: Cap to add at the start of the stroke (One of: "round", "square", "circle")
+        endcap: Cap to add at the end of the stroke (One of: "round", "square", "circle")
+        jointype: Joining type (One of: "round", "bevel", "mitre", "circle")
         remove_internal: Remove the internal path when stroking closed curves
         remove_external: Remove the external path when stroking closed curves
         segmentwise: Whether to apply a noodle to each segment, or to the whole curve
@@ -29,11 +29,11 @@ def constant_width_stroke(
     Returns nothing, but modifies the glyph.
     """
 
-    if startcap not in ["round", "square"]:
+    if startcap not in ["round", "square", "circle"]:
         raise ValueError("Unknown start cap type")
-    if endcap not in ["round", "square"]:
+    if endcap not in ["round", "square", "circle"]:
         raise ValueError("Unknown end cap type")
-    if jointype not in ["round", "bevel", "mitre"]:
+    if jointype not in ["round", "bevel", "mitre", "circle"]:
         raise ValueError("Unknown join type")
     list_of_list_of_points = [list(c) for c in list(glyph)]
     res = cws_rust(
