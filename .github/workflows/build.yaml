@@ -23,8 +23,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        target: [x86_64,aarch64]
-        python: ["3.10", "3.11", "3.12"]
+        target: [x86_64]
+        python: ["3.10"]
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
@@ -39,7 +39,6 @@ jobs:
           target: ${{ matrix.target }}
           args: --release --out dist --find-interpreter
           sccache: 'true'
-          container: off
           rust-toolchain: nightly
       - name: Upload wheels
         uses: actions/upload-artifact@v3
