@@ -1,19 +1,9 @@
-use glifparser::glif::VWSHandle;
-use glifparser::Handle;
-use glifparser::Outline;
-use glifparser::Point;
-use glifparser::PointData;
-use glifparser::VWSContour;
 use glifparser::{
-    glif::{InterpolationType, MFEKPointData},
-    CapType, JoinType, PointType,
+    glif::{InterpolationType, MFEKPointData, VWSHandle},
+    CapType, Handle, JoinType, Outline, Point, PointData, PointType, VWSContour,
 };
-use pyo3::prelude::*;
-use pyo3::types::PyList;
-use pyo3::wrap_pyfunction;
-use MFEKmath::variable_width_stroke;
-use MFEKmath::variable_width_stroking::VWSSettings;
-use MFEKmath::Piecewise;
+use pyo3::{prelude::*, types::PyList, wrap_pyfunction};
+use MFEKmath::{variable_width_stroke, variable_width_stroking::VWSSettings, Piecewise};
 
 /// Formats the sum of two numbers as string.
 #[pyfunction]
@@ -87,15 +77,15 @@ fn constant_width_stroke_internal(
                 .map(|p| {
                     variable_width_stroke(
                         &Piecewise::new(vec![p.clone()], None),
-                        &vws_contour,
+                        vws_contour,
                         &settings.vws_settings,
                     )
                 })
                 .collect()
         } else {
             vec![variable_width_stroke(
-                &pwpath_contour,
-                &vws_contour,
+                pwpath_contour,
+                vws_contour,
                 &settings.vws_settings,
             )]
         };
@@ -122,20 +112,20 @@ fn py_ufo_glyph_to_outline(contours: &PyList) -> Outline<MFEKPointData> {
         let points: &PyList = contour.downcast::<PyList>().unwrap();
         let mut out_contour = vec![];
         for i in 0..(points.len() as isize) {
-            let next = (i + 1) % (points.len() as isize);
+            let next = ((i + 1) % (points.len() as isize)) as usize;
             let prev = if i - 1 < 0 {
                 (points.len() as isize) - 1
             } else {
                 i - 1
-            };
-            let point = points.get_item(i);
+            } as usize;
+            let point = points.get_item(i as usize).unwrap();
             let typ: PyResult<&str> = get_point_type(point);
             if typ.is_err() {
                 continue;
             }
 
-            let next_node = points.get_item(next);
-            let prev_node = points.get_item(prev);
+            let next_node = points.get_item(next).unwrap();
+            let prev_node = points.get_item(prev).unwrap();
 
             let x: f32 = point.getattr("x").unwrap().extract().unwrap();
             let y: f32 = point.getattr("y").unwrap().extract().unwrap();

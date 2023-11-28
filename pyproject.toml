@@ -1,7 +1,13 @@
 name = "ufostroker"
-version = "0.2.3"
+version = "0.3.0"
 description = "Path stroking for UFO glyphs"
 readme = "README.md"
+
+classifier = [
+  "Programming Language :: Rust",
+  "Topic :: Multimedia :: Graphics :: Editors :: Vector-Based",
+]
+
 
 [project]
 dependencies = ["ufo2ft", "beziers>=0.4.0"]
@@ -9,5 +15,5 @@ dev-dependencies = ["ufoLib2~=0.11.0", "defcon==0.8.1"]
 name = "ufostroker"
 
 [build-system]
-requires = ["maturin>=0.10,<0.11"]
+requires = ["maturin>=1.3.2"]
 build-backend = "maturin"
