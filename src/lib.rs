@@ -1,9 +1,12 @@
 use glifparser::{
-    glif::{InterpolationType, MFEKPointData, VWSHandle},
-    CapType, Handle, JoinType, Outline, Point, PointData, PointType, VWSContour,
+    glif::contour_operations::vws::{InterpolationType, VWSHandle},
+    CapType, Handle, JoinType, MFEKPointData, Outline, Point, PointType, VWSContour,
 };
 use pyo3::{prelude::*, types::PyList, wrap_pyfunction};
-use MFEKmath::{variable_width_stroke, variable_width_stroking::VWSSettings, Piecewise};
+use MFEKmath::{
+    variable_width_stroking::{variable_width_stroke, VWSSettings},
+    Piecewise,
+};
 
 /// Formats the sum of two numbers as string.
 #[pyfunction]
@@ -18,7 +21,7 @@ fn ufostroker(_py: Python, m: &PyModule) -> PyResult<()> {
 }
 
 struct CWSSettings {
-    vws_settings: VWSSettings,
+    vws_settings: VWSSettings<MFEKPointData>,
     width: f64,
     height: f64,
     angle: f64,
