@@ -10,6 +10,8 @@ def constant_width_stroke(
     startcap="round",
     endcap="round",
     jointype="bevel",
+    height=None,
+    angle=0,
     remove_internal=False,
     remove_external=False,
     segmentwise=False,
@@ -36,9 +38,14 @@ def constant_width_stroke(
     if jointype not in ["round", "bevel", "mitre", "circle"]:
         raise ValueError("Unknown join type")
     list_of_list_of_points = [list(c) for c in list(glyph)]
+    if height is None:
+        height = width / 2.0
+        width = width / 2.0
     res = cws_rust(
         list_of_list_of_points,
         width,
+        height,
+        angle,
         startcap,
         endcap,
         jointype,

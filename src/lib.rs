@@ -30,6 +30,8 @@ fn ufostroker(_py: Python, m: &PyModule) -> PyResult<()> {
 struct CWSSettings {
     vws_settings: VWSSettings,
     width: f64,
+    height: f64,
+    angle: f64,
     jointype: JoinType,
     startcap: CapType,
     endcap: CapType,
@@ -59,9 +61,9 @@ fn constant_width_stroke_internal(
     let mut vws_contours = vec![vws_contour; path.len()];
 
     let vws_handle = VWSHandle {
-        left_offset: settings.width / 2.0,
-        right_offset: settings.width / 2.0,
-        tangent_offset: 0.0,
+        left_offset: settings.width,
+        right_offset: settings.height,
+        tangent_offset: settings.angle,
         interpolation: InterpolationType::Linear,
     };
 
@@ -218,6 +220,8 @@ fn str_to_cap(s: &str) -> CapType {
 fn constant_width_stroke(
     contours: &PyList,
     width: f64,
+    height: f64,
+    angle: f64,
     startcap: &str,
     endcap: &str,
     jointype: &str,
@@ -232,6 +236,8 @@ fn constant_width_stroke(
     let settings = CWSSettings {
         vws_settings,
         width,
+        height,
+        angle,
         startcap: str_to_cap(startcap),
         endcap: str_to_cap(endcap),
         jointype: str_to_jointype(jointype),
